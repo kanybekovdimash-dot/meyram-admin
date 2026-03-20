@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meyram Cinema — Дашборд</title>
+    <title>Meyram Cinema — Жобалар</title>
     <meta name="description" content="Meyram Cinema әкімші панелі.">
     <meta name="apollo-api-base" content="https://apolloai-meyram-api.kanybekovdimash.workers.dev">
     <meta name="apollo-supabase-url" content="https://aaicokmoftpdovszomvi.supabase.co">
@@ -14,7 +14,7 @@
     <link rel="icon" href="https://meyram.agency/themes/meyram/assets/img/logo.svg">
     <link rel="stylesheet" href="./admin.css">
 </head>
-<body class="admin-body" data-page="dashboard">
+<body class="admin-body" data-page="projects">
     <div class="admin-shell">
         <aside class="admin-sidebar">
             <div class="admin-brand">
@@ -26,8 +26,8 @@
             </div>
             <p class="admin-sidebar__copy">Фильмдер, рөлдер, өтінімдер, видео және AI мәтіндері бір жерде басқарылады.</p>
             <nav class="admin-sidebar__nav">
-                <a href="./index.html" class="is-active">Дашборд</a>
-                <a href="./projects.html">Жобалар</a>
+                <a href="./index.html">Дашборд</a>
+                <a href="./projects.html" class="is-active">Жобалар</a>
                 <a href="./applications.html">Өтінімдер</a>
                 <a href="./users.html">Қолданушылар</a>
                 <a href="./leads.html">Чат өтінімдері</a>
@@ -40,9 +40,9 @@
         <main class="admin-main">
             <section class="admin-hero">
                 <div>
-                    <span class="admin-hero__eyebrow">Әкімшілік жүйе</span>
-                    <h1>Дашборд</h1>
-                    <p>Жүйенің жалпы күйі, соңғы көрсеткіштер және бөлімдерге жылдам өту осы бетте жиналады.</p>
+                    <span class="admin-hero__eyebrow">Жобалар бөлімі</span>
+                    <h1>Жобалар</h1>
+                    <p>Фильмдерді, постерлерді, баннерлерді және рөлдер құрылымын осы беттен басқарасыз.</p>
                 </div>
                 <div class="admin-toolbar">
                     <button class="admin-button admin-button--ghost" id="adminRefresh" type="button">Жаңарту</button>
@@ -79,22 +79,43 @@
             </section>
 
             <section class="admin-content" id="adminContent" hidden>
-                <section class="admin-stats" id="adminStats"></section>
                 <section class="admin-grid">
-                    <article class="admin-panel admin-panel--empty-state">
+                    <article class="admin-panel" id="projects">
                         <div class="admin-panel__header">
                             <div>
-                                <span class="admin-panel__eyebrow">Жылдам өту</span>
-                                <h2>Басқару бөлімдері</h2>
+                                <span class="admin-panel__eyebrow">Жобалар бөлімі</span>
+                                <h2>Фильмдер, постерлер және роли</h2>
+                            </div>
+                            <div class="admin-toolbar">
+                                <span class="admin-count" id="projectsCount">0</span>
+                                <button class="admin-button admin-button--ghost" id="newProjectButton" type="button">Жаңа жоба</button>
                             </div>
                         </div>
-                        <div class="admin-shortcuts">
-                            <a class="admin-shortcut" href="./projects.html">Жобалар</a>
-                            <a class="admin-shortcut" href="./applications.html">Өтінімдер</a>
-                            <a class="admin-shortcut" href="./users.html">Қолданушылар</a>
-                            <a class="admin-shortcut" href="./leads.html">Чат өтінімдері</a>
-                            <a class="admin-shortcut" href="./videos.html">Видео</a>
-                            <a class="admin-shortcut" href="./ai.html">AI және мәтіндер</a>
+                        <div class="admin-cms-layout">
+                            <div class="admin-projects-list" id="projectsCatalogList"></div>
+                            <form id="projectEditorForm" class="admin-form admin-form--stacked">
+                                <input name="id" type="hidden">
+                                <div class="admin-form__grid admin-form__grid--2">
+                                    <label class="admin-field"><span>Жоба атауы</span><input name="title" type="text" required></label>
+                                    <label class="admin-field"><span>Жоба ID</span><input name="idVisible" type="text" placeholder="автоматты түрде толады"></label>
+                                    <label class="admin-field"><span>Жанр</span><input name="genre" type="text"></label>
+                                    <label class="admin-field"><span>Жас санаты</span><input name="ageRange" type="text"></label>
+                                    <label class="admin-field"><span>Режиссер</span><input name="director" type="text"></label>
+                                    <label class="admin-field"><span>Қабылдау мерзімі</span><input name="countdownDate" type="datetime-local"></label>
+                                </div>
+                                <label class="admin-field"><span>Сипаттама</span><textarea name="description" rows="4"></textarea></label>
+                                <div class="admin-form__grid admin-form__grid--2">
+                                    <label class="admin-field"><span>Постер сілтемесі</span><input name="poster" type="url"></label>
+                                    <label class="admin-field"><span>Баннер сілтемесі</span><input name="banner" type="url"></label>
+                                    <label class="admin-field"><span>Таныстырылым видео сілтемесі</span><input name="promoVideoUrl" type="url"></label>
+                                    <label class="admin-field admin-field--checkbox"><input name="isPublished" type="checkbox" checked><span>Сайтта көрсету</span></label>
+                                </div>
+                                <label class="admin-field"><span>Рөлдер тізімі (JSON)</span><textarea name="rolesJson" rows="14" placeholder='[ { "title": "Бас кейіпкер", "status": "open" } ]'></textarea></label>
+                                <div class="admin-form__actions">
+                                    <button class="admin-button admin-button--ghost" id="resetProjectButton" type="button">Тазалау</button>
+                                    <button class="admin-button" type="submit">Жобаны сақтау</button>
+                                </div>
+                            </form>
                         </div>
                     </article>
                 </section>

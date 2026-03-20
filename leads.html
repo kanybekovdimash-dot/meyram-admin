@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meyram Cinema — Дашборд</title>
+    <title>Meyram Cinema — Чат өтінімдері</title>
     <meta name="description" content="Meyram Cinema әкімші панелі.">
     <meta name="apollo-api-base" content="https://apolloai-meyram-api.kanybekovdimash.workers.dev">
     <meta name="apollo-supabase-url" content="https://aaicokmoftpdovszomvi.supabase.co">
@@ -14,7 +14,7 @@
     <link rel="icon" href="https://meyram.agency/themes/meyram/assets/img/logo.svg">
     <link rel="stylesheet" href="./admin.css">
 </head>
-<body class="admin-body" data-page="dashboard">
+<body class="admin-body" data-page="leads">
     <div class="admin-shell">
         <aside class="admin-sidebar">
             <div class="admin-brand">
@@ -26,11 +26,11 @@
             </div>
             <p class="admin-sidebar__copy">Фильмдер, рөлдер, өтінімдер, видео және AI мәтіндері бір жерде басқарылады.</p>
             <nav class="admin-sidebar__nav">
-                <a href="./index.html" class="is-active">Дашборд</a>
+                <a href="./index.html">Дашборд</a>
                 <a href="./projects.html">Жобалар</a>
                 <a href="./applications.html">Өтінімдер</a>
                 <a href="./users.html">Қолданушылар</a>
-                <a href="./leads.html">Чат өтінімдері</a>
+                <a href="./leads.html" class="is-active">Чат өтінімдері</a>
                 <a href="./videos.html">Видео</a>
                 <a href="./ai.html">AI және мәтіндер</a>
             </nav>
@@ -40,9 +40,9 @@
         <main class="admin-main">
             <section class="admin-hero">
                 <div>
-                    <span class="admin-hero__eyebrow">Әкімшілік жүйе</span>
-                    <h1>Дашборд</h1>
-                    <p>Жүйенің жалпы күйі, соңғы көрсеткіштер және бөлімдерге жылдам өту осы бетте жиналады.</p>
+                    <span class="admin-hero__eyebrow">Чат арқылы келген өтінімдер</span>
+                    <h1>Чат өтінімдері</h1>
+                    <p>AI чат арқылы жиналған өтінімдер мен байланыс деректерін осы жерден қарайсыз.</p>
                 </div>
                 <div class="admin-toolbar">
                     <button class="admin-button admin-button--ghost" id="adminRefresh" type="button">Жаңарту</button>
@@ -79,23 +79,10 @@
             </section>
 
             <section class="admin-content" id="adminContent" hidden>
-                <section class="admin-stats" id="adminStats"></section>
                 <section class="admin-grid">
-                    <article class="admin-panel admin-panel--empty-state">
-                        <div class="admin-panel__header">
-                            <div>
-                                <span class="admin-panel__eyebrow">Жылдам өту</span>
-                                <h2>Басқару бөлімдері</h2>
-                            </div>
-                        </div>
-                        <div class="admin-shortcuts">
-                            <a class="admin-shortcut" href="./projects.html">Жобалар</a>
-                            <a class="admin-shortcut" href="./applications.html">Өтінімдер</a>
-                            <a class="admin-shortcut" href="./users.html">Қолданушылар</a>
-                            <a class="admin-shortcut" href="./leads.html">Чат өтінімдері</a>
-                            <a class="admin-shortcut" href="./videos.html">Видео</a>
-                            <a class="admin-shortcut" href="./ai.html">AI және мәтіндер</a>
-                        </div>
+                    <article class="admin-panel" id="leads">
+                        <div class="admin-panel__header"><div><span class="admin-panel__eyebrow">Чат өтінімдері</span><h2>Чат арқылы келген өтінімдер</h2></div><span class="admin-count" id="leadsCount">0</span></div>
+                        <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Бала</th><th>Ата-ана</th><th>Қала</th><th>Тәжірибе</th><th>Уақыты</th></tr></thead><tbody id="leadsTableBody"></tbody></table></div>
                     </article>
                 </section>
             </section>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meyram Cinema — Дашборд</title>
+    <title>Meyram Cinema — AI және мәтіндер</title>
     <meta name="description" content="Meyram Cinema әкімші панелі.">
     <meta name="apollo-api-base" content="https://apolloai-meyram-api.kanybekovdimash.workers.dev">
     <meta name="apollo-supabase-url" content="https://aaicokmoftpdovszomvi.supabase.co">
@@ -14,7 +14,7 @@
     <link rel="icon" href="https://meyram.agency/themes/meyram/assets/img/logo.svg">
     <link rel="stylesheet" href="./admin.css">
 </head>
-<body class="admin-body" data-page="dashboard">
+<body class="admin-body" data-page="ai">
     <div class="admin-shell">
         <aside class="admin-sidebar">
             <div class="admin-brand">
@@ -26,13 +26,13 @@
             </div>
             <p class="admin-sidebar__copy">Фильмдер, рөлдер, өтінімдер, видео және AI мәтіндері бір жерде басқарылады.</p>
             <nav class="admin-sidebar__nav">
-                <a href="./index.html" class="is-active">Дашборд</a>
+                <a href="./index.html">Дашборд</a>
                 <a href="./projects.html">Жобалар</a>
                 <a href="./applications.html">Өтінімдер</a>
                 <a href="./users.html">Қолданушылар</a>
                 <a href="./leads.html">Чат өтінімдері</a>
                 <a href="./videos.html">Видео</a>
-                <a href="./ai.html">AI және мәтіндер</a>
+                <a href="./ai.html" class="is-active">AI және мәтіндер</a>
             </nav>
             <div class="admin-sidebar__footer"><a href="https://apolloai.biz/">Негізгі сайтқа оралу</a></div>
         </aside>
@@ -40,9 +40,9 @@
         <main class="admin-main">
             <section class="admin-hero">
                 <div>
-                    <span class="admin-hero__eyebrow">Әкімшілік жүйе</span>
-                    <h1>Дашборд</h1>
-                    <p>Жүйенің жалпы күйі, соңғы көрсеткіштер және бөлімдерге жылдам өту осы бетте жиналады.</p>
+                    <span class="admin-hero__eyebrow">AI баптаулары</span>
+                    <h1>AI және мәтіндер</h1>
+                    <p>Чаттың мәтіндері, сұрақ-жауап базасы және жүйелік нұсқаулық осы бетте реттеледі.</p>
                 </div>
                 <div class="admin-toolbar">
                     <button class="admin-button admin-button--ghost" id="adminRefresh" type="button">Жаңарту</button>
@@ -79,23 +79,27 @@
             </section>
 
             <section class="admin-content" id="adminContent" hidden>
-                <section class="admin-stats" id="adminStats"></section>
                 <section class="admin-grid">
-                    <article class="admin-panel admin-panel--empty-state">
+                    <article class="admin-panel" id="ai">
                         <div class="admin-panel__header">
                             <div>
-                                <span class="admin-panel__eyebrow">Жылдам өту</span>
-                                <h2>Басқару бөлімдері</h2>
+                                <span class="admin-panel__eyebrow">AI баптаулары</span>
+                                <h2>Чат, сұрақ-жауап және нұсқаулық</h2>
                             </div>
                         </div>
-                        <div class="admin-shortcuts">
-                            <a class="admin-shortcut" href="./projects.html">Жобалар</a>
-                            <a class="admin-shortcut" href="./applications.html">Өтінімдер</a>
-                            <a class="admin-shortcut" href="./users.html">Қолданушылар</a>
-                            <a class="admin-shortcut" href="./leads.html">Чат өтінімдері</a>
-                            <a class="admin-shortcut" href="./videos.html">Видео</a>
-                            <a class="admin-shortcut" href="./ai.html">AI және мәтіндер</a>
-                        </div>
+                        <form id="aiSettingsForm" class="admin-form admin-form--stacked">
+                            <div class="admin-form__grid admin-form__grid--2">
+                                <label class="admin-field"><span>Сайт атауы</span><input name="publicBrand" type="text"></label>
+                                <label class="admin-field"><span>Көмекші атауы</span><input name="assistantBrand" type="text"></label>
+                            </div>
+                            <label class="admin-field"><span>Сұрақ-жауап: жас</span><textarea name="faqAge" rows="3"></textarea></label>
+                            <label class="admin-field"><span>Сұрақ-жауап: процесс</span><textarea name="faqProcess" rows="3"></textarea></label>
+                            <label class="admin-field"><span>Сұрақ-жауап: жалпы</span><textarea name="faqGeneric" rows="3"></textarea></label>
+                            <label class="admin-field"><span>Жүйелік нұсқаулық мәтіні</span><textarea name="systemPromptOverride" rows="12" placeholder="Бос қалдырсаңыз — әдепкі мәтін қолданылады"></textarea></label>
+                            <div class="admin-form__actions">
+                                <button class="admin-button" type="submit">AI баптауларын сақтау</button>
+                            </div>
+                        </form>
                     </article>
                 </section>
             </section>
