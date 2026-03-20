@@ -6,6 +6,8 @@ const runtime = {
   supabaseAnonKey: document.querySelector('meta[name="apollo-supabase-anon-key"]')?.getAttribute('content') || ''
 };
 
+const currentPage = document.body?.dataset.page || 'dashboard';
+
 const emptyAiSettings = () => ({
   publicBrand: 'Meyram Cinema',
   assistantBrand: 'Meyram AI',
@@ -70,10 +72,17 @@ const elements = {
   leadsCount: document.getElementById('leadsCount'),
   leadsTableBody: document.getElementById('leadsTableBody'),
   videosCount: document.getElementById('videosCount'),
-  videosList: document.getElementById('videosList')
+  videosList: document.getElementById('videosList'),
+  navLinks: Array.from(document.querySelectorAll('.admin-sidebar__nav a[data-nav-key]'))
 };
 
 init();
+
+function applyActiveNav() {
+  elements.navLinks.forEach((link) => {
+    link.classList.toggle('is-active', link.dataset.navKey === currentPage);
+  });
+}
 
 function init() {
   elements.authForm?.addEventListener('submit', onSubmitAuth);
@@ -448,6 +457,7 @@ async function fetchAdminJson(path, options = {}, hasRetried = false) {
 }
 
 function render() {
+  applyActiveNav();
   elements.error.hidden = !state.error;
   elements.error.textContent = state.error;
 

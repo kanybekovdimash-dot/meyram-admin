@@ -131,7 +131,7 @@ textarea { resize: vertical; min-height: 120px; }
     transform: translateX(2px);
 }
 
-.admin-sidebar__nav a:first-child {
+.admin-sidebar__nav a.is-active {
     background: linear-gradient(135deg, #c79d5d 0%, #a97b3a 100%);
     color: #fff;
     border-color: rgba(169, 123, 58, 0.9);
@@ -197,6 +197,24 @@ textarea { resize: vertical; min-height: 120px; }
 .admin-content {
     display: grid;
     gap: 24px;
+}
+
+.page-block {
+    display: none;
+}
+
+body[data-page="dashboard"] .admin-stats.page-block--dashboard,
+body[data-page="dashboard"] .admin-dashboard-grid.page-block--dashboard {
+    display: grid;
+}
+
+body[data-page="ai"] .page-block--ai,
+body[data-page="projects"] .page-block--projects,
+body[data-page="applications"] .page-block--applications,
+body[data-page="users"] .page-block--users,
+body[data-page="leads"] .page-block--leads,
+body[data-page="videos"] .page-block--videos {
+    display: block;
 }
 
 .admin-button {
@@ -763,7 +781,7 @@ textarea { resize: vertical; min-height: 120px; }
     background: rgba(255,255,255,.55);
 }
 
-.admin-guest .admin-sidebar__nav a:first-child {
+.admin-guest .admin-sidebar__nav a.is-active {
     background: linear-gradient(135deg, #c79d5d 0%, #a97b3a 100%);
     color: #fff;
 }
@@ -796,3 +814,4 @@ textarea { resize: vertical; min-height: 120px; }
     .admin-bar-chart__track { height: 120px; }
     .admin-panel, .admin-panel--dashboard { padding: 22px; }
 }
+
