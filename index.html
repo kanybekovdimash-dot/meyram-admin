@@ -1,32 +1,175 @@
 <!DOCTYPE html>
 <html lang="kk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meyram Cinema — Әкімші панелі</title>
-  <meta http-equiv="refresh" content="0; url=https://apolloai.biz/admin.html">
-  <link rel="canonical" href="https://apolloai.biz/admin.html">
-  <style>
-    :root { color-scheme: light; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      font-family: Arial, sans-serif;
-      background: #f8f5ee;
-      color: #111;
-    }
-    a {
-      color: #111;
-      font-weight: 700;
-    }
-  </style>
-  <script>
-    window.location.replace('https://apolloai.biz/admin.html');
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meyram Cinema — Әкімші панелі</title>
+    <meta name="description" content="Meyram Cinema әкімші панелі.">
+    <meta name="apollo-api-base" content="https://apolloai-meyram-api.kanybekovdimash.workers.dev">
+    <meta name="apollo-supabase-url" content="https://aaicokmoftpdovszomvi.supabase.co">
+    <meta name="apollo-supabase-anon-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhaWNva21vZnRwZG92c3pvbXZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MjMwODIsImV4cCI6MjA4OTQ5OTA4Mn0.Z6G7yPV7hYiGkoL9sOmg1UOEY6OJkEIPM5HXXaC9ZQs">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://meyram.agency/themes/meyram/assets/img/logo.svg">
+    <link rel="stylesheet" href="./admin.css">
 </head>
-<body>
-  <p>Әкімші панелі көшірілді: <a href="https://apolloai.biz/admin.html">apolloai.biz/admin.html</a></p>
+<body class="admin-body">
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <div class="admin-brand">
+                <img src="https://meyram.agency/themes/meyram/assets/img/logo.svg" alt="Meyram Cinema">
+                <div>
+                    <span class="admin-brand__eyebrow">Meyram Cinema</span>
+                    <strong>Әкімші панелі</strong>
+                </div>
+            </div>
+            <p class="admin-sidebar__copy">Фильмдер, рөлдер, өтінімдер, видео және AI мәтіндері бір жерде басқарылады.</p>
+            <nav class="admin-sidebar__nav">
+                <a href="#dashboard">Дашборд</a>
+                <a href="#projects">Жобалар</a>
+                <a href="#applications">Өтінімдер</a>
+                <a href="#users">Қолданушылар</a>
+                <a href="#leads">Чат өтінімдері</a>
+                <a href="#videos">Видео</a>
+                <a href="#ai">AI және мәтіндер</a>
+            </nav>
+            <div class="admin-sidebar__footer"><a href="https://apolloai.biz/">Негізгі сайтқа оралу</a></div>
+        </aside>
+
+        <main class="admin-main">
+            <section class="admin-hero" id="dashboard">
+                <div>
+                    <span class="admin-hero__eyebrow">Әкімшілік жүйе</span>
+                    <h1>Meyram Cinema әкімші панелі</h1>
+                    <p>Осы жерден фильмдер, постерлер, рөлдер, таныстырылым видеолары, чат мәтіндері мен өтінімдер басқарылады.</p>
+                </div>
+                <div class="admin-toolbar">
+                    <button class="admin-button admin-button--ghost" id="adminRefresh" type="button">Жаңарту</button>
+                    <button class="admin-button admin-button--ghost" id="adminSignOut" type="button">Шығу</button>
+                </div>
+            </section>
+
+            <section class="admin-auth" id="adminAuthCard">
+                <div class="admin-auth__brand" aria-hidden="true">
+                    <img src="https://meyram.agency/themes/meyram/assets/img/logo.svg" alt="Meyram Cinema">
+                    <strong>Meyram Cinema</strong>
+                    <span>Әкімшілік жүйеге кіру</span>
+                </div>
+                <div class="admin-panel admin-panel--auth">
+                    <div class="admin-auth__heading">
+                        <h2>Кіру</h2>
+                        
+                    </div>
+                    <form id="adminAuthForm" class="admin-auth__form admin-auth__form--stacked">
+                        <div class="admin-form__grid admin-form__grid--2">
+                            <label class="admin-field admin-field--auth">
+                                <input id="adminEmailInput" name="email" type="email" autocomplete="username" placeholder="" aria-label="Электрон пошта">
+                            </label>
+                            <label class="admin-field admin-field--auth">
+                                <input id="adminPasswordInput" name="password" type="password" autocomplete="current-password" placeholder="" aria-label="Құпиясөз">
+                            </label>
+                        </div>
+                        <div class="admin-form__actions admin-form__actions--auth">
+                            <button class="admin-button" type="submit">Кіру</button>
+                        </div>
+                    </form>
+                    
+                    <p class="admin-auth__error" id="adminError" hidden></p>
+                </div>
+                <p class="admin-auth__footer">© 2026 Meyram Cinema. Барлық құқықтар қорғалған.</p>
+            </section>
+
+                        <section class="admin-content" id="adminContent" hidden>
+                <section class="admin-stats" id="adminStats"></section>
+
+                <section class="admin-grid admin-grid--top">
+                    <article class="admin-panel" id="ai">
+                        <div class="admin-panel__header">
+                            <div>
+                                <span class="admin-panel__eyebrow">AI баптаулары</span>
+                                <h2>Чат, сұрақ-жауап және нұсқаулық</h2>
+                            </div>
+                        </div>
+                        <form id="aiSettingsForm" class="admin-form admin-form--stacked">
+                            <div class="admin-form__grid admin-form__grid--2">
+                                <label class="admin-field"><span>Сайт атауы</span><input name="publicBrand" type="text"></label>
+                                <label class="admin-field"><span>Көмекші атауы</span><input name="assistantBrand" type="text"></label>
+                            </div>
+                            <label class="admin-field"><span>Сұрақ-жауап: жас</span><textarea name="faqAge" rows="3"></textarea></label>
+                            <label class="admin-field"><span>Сұрақ-жауап: процесс</span><textarea name="faqProcess" rows="3"></textarea></label>
+                            <label class="admin-field"><span>Сұрақ-жауап: жалпы</span><textarea name="faqGeneric" rows="3"></textarea></label>
+                            <label class="admin-field"><span>Жүйелік нұсқаулық мәтіні</span><textarea name="systemPromptOverride" rows="12" placeholder="Бос қалдырсаңыз — әдепкі мәтін қолданылады"></textarea></label>
+                            <div class="admin-form__actions">
+                                <button class="admin-button" type="submit">AI баптауларын сақтау</button>
+                            </div>
+                        </form>
+                    </article>
+
+                    <article class="admin-panel" id="projects">
+                        <div class="admin-panel__header">
+                            <div>
+                                <span class="admin-panel__eyebrow">Жобалар бөлімі</span>
+                                <h2>Фильмдер, постерлер және роли</h2>
+                            </div>
+                            <div class="admin-toolbar">
+                                <span class="admin-count" id="projectsCount">0</span>
+                                <button class="admin-button admin-button--ghost" id="newProjectButton" type="button">Жаңа жоба</button>
+                            </div>
+                        </div>
+                        <div class="admin-cms-layout">
+                            <div class="admin-projects-list" id="projectsCatalogList"></div>
+                            <form id="projectEditorForm" class="admin-form admin-form--stacked">
+                                <input name="id" type="hidden">
+                                <div class="admin-form__grid admin-form__grid--2">
+                                    <label class="admin-field"><span>Жоба атауы</span><input name="title" type="text" required></label>
+                                    <label class="admin-field"><span>Жоба ID</span><input name="idVisible" type="text" placeholder="автоматты түрде толады"></label>
+                                    <label class="admin-field"><span>Жанр</span><input name="genre" type="text"></label>
+                                    <label class="admin-field"><span>Жас санаты</span><input name="ageRange" type="text"></label>
+                                    <label class="admin-field"><span>Режиссер</span><input name="director" type="text"></label>
+                                    <label class="admin-field"><span>Қабылдау мерзімі</span><input name="countdownDate" type="datetime-local"></label>
+                                </div>
+                                <label class="admin-field"><span>Сипаттама</span><textarea name="description" rows="4"></textarea></label>
+                                <div class="admin-form__grid admin-form__grid--2">
+                                    <label class="admin-field"><span>Постер сілтемесі</span><input name="poster" type="url"></label>
+                                    <label class="admin-field"><span>Баннер сілтемесі</span><input name="banner" type="url"></label>
+                                    <label class="admin-field"><span>Таныстырылым видео сілтемесі</span><input name="promoVideoUrl" type="url"></label>
+                                    <label class="admin-field admin-field--checkbox"><input name="isPublished" type="checkbox" checked><span>Сайтта көрсету</span></label>
+                                </div>
+                                <label class="admin-field"><span>Рөлдер тізімі (JSON)</span><textarea name="rolesJson" rows="14" placeholder='[ { "title": "Бас кейіпкер", "status": "open" } ]'></textarea></label>
+                                <div class="admin-form__actions">
+                                    <button class="admin-button admin-button--ghost" id="resetProjectButton" type="button">Тазалау</button>
+                                    <button class="admin-button" type="submit">Жобаны сақтау</button>
+                                </div>
+                            </form>
+                        </div>
+                    </article>
+                </section>
+                <section class="admin-grid">
+                    <article class="admin-panel" id="applications">
+                        <div class="admin-panel__header"><div><span class="admin-panel__eyebrow">Жоба өтінімдері</span><h2>Жобаға өтінімдер</h2></div><span class="admin-count" id="applicationsCount">0</span></div>
+                        <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Жоба / рөл</th><th>Үміткер</th><th>Байланыс</th><th>Күйі</th><th>Уақыты</th></tr></thead><tbody id="applicationsTableBody"></tbody></table></div>
+                    </article>
+                    <article class="admin-panel" id="users">
+                        <div class="admin-panel__header"><div><span class="admin-panel__eyebrow">Қолданушылар</span><h2>Тіркелген адамдар</h2></div><span class="admin-count" id="usersCount">0</span></div>
+                        <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Электрон пошта</th><th>Аты</th><th>Телефон</th><th>Рөлі</th><th>Тіркелген уақыты</th></tr></thead><tbody id="usersTableBody"></tbody></table></div>
+                    </article>
+                    <article class="admin-panel" id="leads">
+                        <div class="admin-panel__header"><div><span class="admin-panel__eyebrow">Чат өтінімдері</span><h2>Чат арқылы келген өтінімдер</h2></div><span class="admin-count" id="leadsCount">0</span></div>
+                        <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Бала</th><th>Ата-ана</th><th>Қала</th><th>Тәжірибе</th><th>Уақыты</th></tr></thead><tbody id="leadsTableBody"></tbody></table></div>
+                    </article>
+                    <article class="admin-panel" id="videos">
+                        <div class="admin-panel__header"><div><span class="admin-panel__eyebrow">Видео өтінімдер</span><h2>Видео визиткалар</h2></div><span class="admin-count" id="videosCount">0</span></div>
+                        <div class="admin-video-list" id="videosList"></div>
+                    </article>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="./admin.js"></script>
 </body>
 </html>
+
+
+

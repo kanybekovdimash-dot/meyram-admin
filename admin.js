@@ -36,6 +36,8 @@ const state = {
   error: '',
   dashboard: null,
   applications: [],
+  users: [],
+  usersTotal: 0,
   leads: [],
   videos: [],
   projects: [],
@@ -61,6 +63,8 @@ const elements = {
   projectsCatalogList: document.getElementById('projectsCatalogList'),
   applicationsCount: document.getElementById('applicationsCount'),
   applicationsTableBody: document.getElementById('applicationsTableBody'),
+  usersCount: document.getElementById('usersCount'),
+  usersTableBody: document.getElementById('usersTableBody'),
   leadsCount: document.getElementById('leadsCount'),
   leadsTableBody: document.getElementById('leadsTableBody'),
   videosCount: document.getElementById('videosCount'),
@@ -87,7 +91,7 @@ function init() {
 
 function loadStoredSession() {
   try {
-    const raw = localStorage.getItem(SESSION_KEY);
+    const raw = sessionStorage.getItem(SESSION_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -97,9 +101,9 @@ function loadStoredSession() {
 function saveStoredSession(session) {
   state.session = session;
   if (session) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
   } else {
-    localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
   }
 }
 
@@ -119,7 +123,7 @@ async function onSubmitAuth(event) {
   const password = String(elements.passwordInput?.value || '').trim();
 
   if (!email || !password) {
-    state.error = 'Email мен құпиясөзді енгізіңіз.';
+    state.error = 'Электрон пошта мен құпиясөзді енгізіңіз.';
     render();
     return;
   }
@@ -153,7 +157,7 @@ async function signInWithPassword(email, password) {
 
   const data = await parseJsonResponse(response);
   if (!response.ok || !data?.access_token) {
-    throw new Error(data?.msg || data?.error_description || data?.error || 'Қате email немесе құпиясөз.');
+    throw new Error(data?.msg || data?.error_description || data?.error || 'Электрон пошта немесе құпиясөз қате.');
   }
 
   return normalizeSession(data);
@@ -186,7 +190,7 @@ async function refreshAuthSession() {
 
 async function ensureAdminSession() {
   if (!state.session?.accessToken) {
-    throw new Error('Админ панельге кіру керек.');
+    throw new Error('Әкімші панеліне кіру керек.');
   }
 
   const expiresSoon = Number(state.session.expiresAt || 0) <= Date.now() + 60_000;
@@ -216,6 +220,8 @@ async function signOut() {
   saveStoredSession(null);
   state.dashboard = null;
   state.applications = [];
+  state.users = [];
+  state.usersTotal = 0;
   state.leads = [];
   state.videos = [];
   state.projects = [];
@@ -239,9 +245,10 @@ async function loadAdminData() {
   try {
     await ensureAdminSession();
 
-    const [dashboard, applications, leads, videos, projects, aiSettings] = await Promise.all([
+    const [dashboard, applications, users, leads, videos, projects, aiSettings] = await Promise.all([
       fetchAdminJson('/admin/dashboard'),
       fetchAdminJson('/admin/project-applications?limit=24'),
+      fetchAdminJson('/admin/users?limit=24'),
       fetchAdminJson('/admin/chat-leads?limit=24'),
       fetchAdminJson('/admin/video-submissions?limit=24'),
       fetchAdminJson('/admin/projects?limit=100'),
@@ -250,6 +257,8 @@ async function loadAdminData() {
 
     state.dashboard = dashboard;
     state.applications = applications.items || [];
+    state.users = (users.items || []).map(normalizeAdminUserRecord);
+    state.usersTotal = Number(users.total || state.users.length || 0);
     state.leads = leads.items || [];
     state.videos = videos.items || [];
     state.projects = (projects.items || []).map(normalizeProjectRecord);
@@ -282,10 +291,28 @@ function renderApplications() {
   `).join('');
 }
 
+function renderUsers() {
+  elements.usersCount.textContent = String(state.usersTotal || state.users.length || 0);
+  if (!state.users.length) {
+    elements.usersTableBody.innerHTML = `<tr><td colspan="5" class="admin-empty">${state.loading ? 'Жүктелуде...' : 'Әзірге тіркелген қолданушы жоқ.'}</td></tr>`;
+    return;
+  }
+
+  elements.usersTableBody.innerHTML = state.users.map((item) => `
+    <tr>
+      <td><div class="admin-cell__title">${escapeHtml(item.email || '—')}</div><div class="admin-cell__meta">ID: ${escapeHtml(item.id || '—')}</div></td>
+      <td><div>${escapeHtml(item.fullName || '—')}</div><div class="admin-cell__meta">Соңғы кіруі: ${formatDate(item.lastSignInAt)}</div></td>
+      <td>${escapeHtml(item.phone || '—')}</td>
+      <td><span class="admin-pill admin-pill--muted">${escapeHtml(item.role || 'authenticated')}</span></td>
+      <td>${formatDate(item.createdAt)}</td>
+    </tr>
+  `).join('');
+}
+
 function renderLeads() {
   elements.leadsCount.textContent = String(state.leads.length || 0);
   if (!state.leads.length) {
-    elements.leadsTableBody.innerHTML = `<tr><td colspan="5" class="admin-empty">${state.loading ? 'Жүктелуде...' : 'Әзірге чат лидтері жоқ.'}</td></tr>`;
+    elements.leadsTableBody.innerHTML = `<tr><td colspan="5" class="admin-empty">${state.loading ? 'Жүктелуде...' : 'Әзірге чат өтінімдері жоқ.'}</td></tr>`;
     return;
   }
   elements.leadsTableBody.innerHTML = state.leads.map((item) => `
@@ -346,10 +373,10 @@ async function onSaveProject(event) {
   try {
     roles = JSON.parse(String(formData.get('rolesJson') || '[]').trim() || '[]');
     if (!Array.isArray(roles)) {
-      throw new Error('Roles JSON must be an array');
+      throw new Error('Рөлдер тізімі JSON массив болуы керек');
     }
   } catch {
-    state.error = 'Roles JSON дұрыс емес.';
+    state.error = 'Рөлдер тізімі JSON пішімі дұрыс емес.';
     render();
     return;
   }
@@ -422,14 +449,20 @@ function render() {
   elements.error.hidden = !state.error;
   elements.error.textContent = state.error;
 
-  const isAuthed = Boolean(state.session?.accessToken && !state.error && (state.dashboard || state.loading || state.projects.length || state.applications.length));
+  const isAuthed = Boolean(state.session?.accessToken);
+  document.body.classList.toggle('admin-authenticated', isAuthed);
+  document.body.classList.toggle('admin-guest', !isAuthed);
+
   elements.authCard.hidden = isAuthed;
   elements.content.hidden = !isAuthed;
+  elements.refresh.hidden = !isAuthed;
+  elements.signOut.hidden = !isAuthed;
 
   renderStats();
   renderAiSettingsForm();
   renderProjectsPanel();
   renderApplications();
+  renderUsers();
   renderLeads();
   renderVideos();
 }
@@ -442,7 +475,8 @@ function renderStats() {
 
   const cards = [
     ['Жобаға өтінімдер', state.dashboard.stats.projectApplications],
-    ['Чат лидтері', state.dashboard.stats.chatLeads],
+    ['Қолданушылар', state.usersTotal],
+    ['Чат өтінімдері', state.dashboard.stats.chatLeads],
     ['Видео-визиткалар', state.dashboard.stats.videoSubmissions]
   ];
 
@@ -544,6 +578,19 @@ function normalizeAiSettings(settings) {
     faqProcess: String(settings.faqProcess || '').trim(),
     faqGeneric: String(settings.faqGeneric || '').trim(),
     systemPromptOverride: String(settings.systemPromptOverride || '').trim()
+  };
+}
+
+function normalizeAdminUserRecord(user) {
+  const metadata = user.user_metadata || {};
+  return {
+    id: String(user.id || '').trim(),
+    email: String(user.email || '').trim(),
+    phone: String(user.phone || '').trim(),
+    role: String(user.appRole || user.role || metadata.role || 'authenticated').trim(),
+    fullName: String(metadata.full_name || metadata.name || metadata.fullName || '').trim(),
+    createdAt: String(user.created_at || '').trim(),
+    lastSignInAt: String(user.last_sign_in_at || '').trim()
   };
 }
 
