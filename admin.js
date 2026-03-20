@@ -81,6 +81,8 @@ function init() {
   elements.projectEditorForm?.addEventListener('submit', onSaveProject);
   elements.newProjectButton?.addEventListener('click', () => selectProject(null));
   elements.resetProjectButton?.addEventListener('click', () => selectProject(state.selectedProjectId));
+  document.addEventListener('click', onDocumentClick);
+  document.addEventListener('keydown', onDocumentKeyDown);
 
   if (state.session?.accessToken) {
     loadAdminData();
@@ -278,7 +280,7 @@ function renderApplications() {
   if (!elements.applicationsCount || !elements.applicationsTableBody) return;
   elements.applicationsCount.textContent = String(state.applications.length || 0);
   if (!state.applications.length) {
-    elements.applicationsTableBody.innerHTML = `<tr><td colspan="5" class="admin-empty">${state.loading ? 'Жүктелуде...' : 'Әзірге өтінім жоқ.'}</td></tr>`;
+    elements.applicationsTableBody.innerHTML = `<tr><td colspan="6" class="admin-empty">${state.loading ? 'Жүктелуде...' : 'Әзірге өтінім жоқ.'}</td></tr>`;
     return;
   }
   elements.applicationsTableBody.innerHTML = state.applications.map((item) => `
@@ -288,6 +290,10 @@ function renderApplications() {
       <td><div>${escapeHtml(item.parent_name || '—')}</div><div class="admin-cell__meta">${escapeHtml(item.phone || '—')}</div></td>
       <td><span class="admin-pill${item.status === 'new' ? '' : ' admin-pill--muted'}">${escapeHtml(item.status || 'new')}</span></td>
       <td>${formatDate(item.created_at)}</td>
+      <td class="admin-table__actions">${renderActionMenu('application', item.id, [
+        { action: 'edit', label: 'Өңдеу' },
+        { action: 'delete', label: 'Жою', destructive: true }
+      ])}</td>
     </tr>
   `).join('');
 }
@@ -296,7 +302,7 @@ function renderUsers() {
   if (!elements.usersCount || !elements.usersTableBody) return;
   elements.usersCount.textContent = String(state.usersTotal || state.users.length || 0);
   if (!state.users.length) {
-    elements.usersTableBody.innerHTML = `<tr><td colspan="5" class="admin-empty">${state.loading ? 'Жүктелуде...' : 'Әзірге тіркелген қолданушы жоқ.'}</td></tr>`;
+    elements.usersTableBody.innerHTML = `<tr><td colspan="6" class="admin-empty">${state.loading ? 'Жүктелуде...' : 'Әзірге тіркелген қолданушы жоқ.'}</td></tr>`;
     return;
   }
 
@@ -307,6 +313,10 @@ function renderUsers() {
       <td>${escapeHtml(item.phone || '—')}</td>
       <td><span class="admin-pill admin-pill--muted">${escapeHtml(item.role || 'authenticated')}</span></td>
       <td>${formatDate(item.createdAt)}</td>
+      <td class="admin-table__actions">${renderActionMenu('user', item.id, [
+        { action: 'edit', label: 'Өңдеу' },
+        { action: 'delete', label: 'Жою', destructive: true }
+      ])}</td>
     </tr>
   `).join('');
 }
@@ -315,7 +325,7 @@ function renderLeads() {
   if (!elements.leadsCount || !elements.leadsTableBody) return;
   elements.leadsCount.textContent = String(state.leads.length || 0);
   if (!state.leads.length) {
-    elements.leadsTableBody.innerHTML = `<tr><td colspan="5" class="admin-empty">${state.loading ? 'Жүктелуде...' : 'Әзірге чат өтінімдері жоқ.'}</td></tr>`;
+    elements.leadsTableBody.innerHTML = `<tr><td colspan="6" class="admin-empty">${state.loading ? 'Жүктелуде...' : 'Әзірге чат өтінімдері жоқ.'}</td></tr>`;
     return;
   }
   elements.leadsTableBody.innerHTML = state.leads.map((item) => `
@@ -325,6 +335,10 @@ function renderLeads() {
       <td>${escapeHtml(item.city || '—')}</td>
       <td>${escapeHtml(item.experience || '—')}</td>
       <td>${formatDate(item.created_at)}</td>
+      <td class="admin-table__actions">${renderActionMenu('lead', item.id, [
+        { action: 'edit', label: 'Өңдеу' },
+        { action: 'delete', label: 'Жою', destructive: true }
+      ])}</td>
     </tr>
   `).join('');
 }
@@ -338,11 +352,22 @@ function renderVideos() {
   }
   elements.videosList.innerHTML = state.videos.map((item) => `
     <article class="admin-video-card">
-      <strong>${escapeHtml(item.file_name || 'video.webm')}</strong>
+      <div class="admin-video-card__header">
+        <div>
+          <strong>${escapeHtml(item.file_name || 'video.webm')}</strong>
+          <p>${formatDate(item.created_at)}</p>
+        </div>
+        ${renderActionMenu('video', item.id, [
+          { action: 'view', label: 'Көру' },
+          { action: 'delete', label: 'Жою', destructive: true }
+        ])}
+      </div>
       <p>Сессия: ${escapeHtml(item.session_id || '—')}</p>
       <p>Өлшемі: ${formatBytes(item.file_size)}</p>
       <p>Path: ${escapeHtml(item.storage_path || '—')}</p>
-      <p>${formatDate(item.created_at)}</p>
+      <div class="admin-video-card__footer">
+        <button class="admin-button admin-button--ghost admin-button--small" type="button" data-direct-action="view-video" data-id="${escapeHtml(item.id || '')}">Видео ашу</button>
+      </div>
     </article>
   `).join('');
 }
@@ -449,6 +474,335 @@ async function fetchAdminJson(path, options = {}, hasRetried = false) {
   return data;
 }
 
+
+function renderActionMenu(entity, id, actions) {
+  return `
+    <div class="admin-actions" data-actions>
+      <button class="admin-icon-button admin-icon-button--menu" type="button" data-action-menu-button aria-label="Әрекеттер">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="admin-action-menu" role="menu">
+        ${actions.map((item) => `
+          <button
+            class="admin-action-menu__item${item.destructive ? ' is-destructive' : ''}"
+            type="button"
+            data-action-menu-item
+            data-entity="${escapeHtml(entity)}"
+            data-action="${escapeHtml(item.action)}"
+            data-id="${escapeHtml(id || '')}">
+            ${escapeHtml(item.label)}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+async function onDocumentClick(event) {
+  const closeButton = event.target.closest('[data-modal-close]');
+  if (closeButton) {
+    closeAdminModal();
+    return;
+  }
+
+  const directAction = event.target.closest('[data-direct-action]');
+  if (directAction) {
+    const action = directAction.getAttribute('data-direct-action');
+    const id = directAction.getAttribute('data-id') || '';
+    if (action === 'view-video' && id) {
+      event.preventDefault();
+      await openVideoPreview(id);
+    }
+    return;
+  }
+
+  const menuItem = event.target.closest('[data-action-menu-item]');
+  if (menuItem) {
+    event.preventDefault();
+    event.stopPropagation();
+    closeActionMenus();
+    await handleMenuAction(
+      menuItem.getAttribute('data-entity') || '',
+      menuItem.getAttribute('data-action') || '',
+      menuItem.getAttribute('data-id') || ''
+    );
+    return;
+  }
+
+  const menuButton = event.target.closest('[data-action-menu-button]');
+  if (menuButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleActionMenu(menuButton.closest('[data-actions]'));
+    return;
+  }
+
+  if (event.target.classList?.contains('admin-modal')) {
+    closeAdminModal();
+    return;
+  }
+
+  closeActionMenus();
+}
+
+function onDocumentKeyDown(event) {
+  if (event.key === 'Escape') {
+    closeActionMenus();
+    closeAdminModal();
+  }
+}
+
+function closeActionMenus() {
+  document.querySelectorAll('.admin-actions.is-open').forEach((node) => node.classList.remove('is-open'));
+}
+
+function toggleActionMenu(container) {
+  if (!container) return;
+  const shouldOpen = !container.classList.contains('is-open');
+  closeActionMenus();
+  if (shouldOpen) {
+    container.classList.add('is-open');
+  }
+}
+
+function getRecordByEntity(entity, id) {
+  const key = String(id || '');
+  if (!key) return null;
+  switch (entity) {
+    case 'application':
+      return state.applications.find((item) => String(item.id) === key) || null;
+    case 'user':
+      return state.users.find((item) => String(item.id) === key) || null;
+    case 'lead':
+      return state.leads.find((item) => String(item.id) === key) || null;
+    case 'video':
+      return state.videos.find((item) => String(item.id) === key) || null;
+    case 'project':
+      return state.projects.find((item) => String(item.id) === key) || null;
+    default:
+      return null;
+  }
+}
+
+async function handleMenuAction(entity, action, id) {
+  const record = getRecordByEntity(entity, id);
+  if (!record) return;
+
+  if (entity === 'project') {
+    if (action === 'edit') {
+      selectProject(id);
+      elements.projectEditorForm?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    if (action === 'delete') {
+      const ok = window.confirm('Бұл жобаны өшіргіңіз келе ме?');
+      if (!ok) return;
+      await fetchAdminJson(`/admin/projects/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      state.projects = state.projects.filter((item) => String(item.id) !== String(id));
+      if (state.selectedProjectId === id) {
+        state.selectedProjectId = state.projects[0]?.id || null;
+      }
+      renderProjectsPanel();
+      return;
+    }
+  }
+
+  if (entity === 'video') {
+    if (action === 'view') {
+      await openVideoPreview(id);
+      return;
+    }
+    if (action === 'delete') {
+      const ok = window.confirm('Бұл видеоны өшіргіңіз келе ме?');
+      if (!ok) return;
+      await fetchAdminJson(`/admin/video-submissions/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      await loadAdminData();
+      return;
+    }
+  }
+
+  if (action === 'delete') {
+    const labels = {
+      application: 'өтінімді',
+      user: 'қолданушыны',
+      lead: 'чат өтінімін'
+    };
+    const ok = window.confirm(`Бұл ${labels[entity] || 'жазбаны'} өшіргіңіз келе ме?`);
+    if (!ok) return;
+    const endpoint = {
+      application: `/admin/project-applications/${encodeURIComponent(id)}`,
+      user: `/admin/users/${encodeURIComponent(id)}`,
+      lead: `/admin/chat-leads/${encodeURIComponent(id)}`
+    }[entity];
+    if (!endpoint) return;
+    await fetchAdminJson(endpoint, { method: 'DELETE' });
+    await loadAdminData();
+    return;
+  }
+
+  if (action === 'edit') {
+    openEditModal(entity, record);
+  }
+}
+
+function openEditModal(entity, record) {
+  const config = getEditConfig(entity, record);
+  if (!config) return;
+
+  openAdminModal({
+    title: config.title,
+    content: `
+      <form class="admin-form admin-modal__form" id="adminEntityEditForm">
+        <div class="admin-form__grid admin-form__grid--2">
+          ${config.fields.map((field) => renderModalField(field)).join('')}
+        </div>
+        <div class="admin-form__actions admin-modal__actions">
+          <button class="admin-button admin-button--ghost" type="button" data-modal-close>Жабу</button>
+          <button class="admin-button" type="submit">Сақтау</button>
+        </div>
+      </form>
+    `
+  });
+
+  document.getElementById('adminEntityEditForm')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const payload = Object.fromEntries(formData.entries());
+    const endpoint = config.endpoint(record.id);
+    await fetchAdminJson(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify({ item: payload })
+    });
+    closeAdminModal();
+    await loadAdminData();
+  });
+}
+
+function getEditConfig(entity, record) {
+  if (entity === 'application') {
+    return {
+      title: 'Өтінімді өңдеу',
+      endpoint: (id) => `/admin/project-applications/${encodeURIComponent(id)}`,
+      fields: [
+        { name: 'full_name', label: 'Үміткер', value: record.full_name || '' },
+        { name: 'age', label: 'Жасы', value: record.age || '' },
+        { name: 'city', label: 'Қала', value: record.city || '' },
+        { name: 'parent_name', label: 'Ата-ана', value: record.parent_name || '' },
+        { name: 'phone', label: 'Телефон', value: record.phone || '' },
+        { name: 'status', label: 'Күйі', value: record.status || 'new' }
+      ]
+    };
+  }
+
+  if (entity === 'user') {
+    return {
+      title: 'Қолданушыны өңдеу',
+      endpoint: (id) => `/admin/users/${encodeURIComponent(id)}`,
+      fields: [
+        { name: 'email', label: 'Электрон пошта', value: record.email || '' },
+        { name: 'full_name', label: 'Аты', value: record.fullName || '' },
+        { name: 'phone', label: 'Телефон', value: record.phone || '' },
+        { name: 'role', label: 'Рөлі', value: record.role || 'authenticated' }
+      ]
+    };
+  }
+
+  if (entity === 'lead') {
+    return {
+      title: 'Чат өтінімін өңдеу',
+      endpoint: (id) => `/admin/chat-leads/${encodeURIComponent(id)}`,
+      fields: [
+        { name: 'child_name', label: 'Бала', value: record.child_name || '' },
+        { name: 'child_age', label: 'Жасы', value: record.child_age || '' },
+        { name: 'city', label: 'Қала', value: record.city || '' },
+        { name: 'parent_name', label: 'Ата-ана', value: record.parent_name || '' },
+        { name: 'phone', label: 'Телефон', value: record.phone || '' },
+        { name: 'experience', label: 'Тәжірибе', value: record.experience || '' },
+        { name: 'note', label: 'Ескерту', value: record.note || '', wide: true, type: 'textarea' }
+      ]
+    };
+  }
+
+  return null;
+}
+
+function renderModalField(field) {
+  const content = field.type === 'textarea'
+    ? `<textarea name="${escapeHtml(field.name)}">${escapeHtml(field.value || '')}</textarea>`
+    : `<input name="${escapeHtml(field.name)}" type="text" value="${escapeHtml(field.value || '')}">`;
+
+  return `
+    <label class="admin-field${field.wide ? ' admin-field--wide' : ''}">
+      <span>${escapeHtml(field.label)}</span>
+      ${content}
+    </label>
+  `;
+}
+
+async function openVideoPreview(id) {
+  const response = await fetchAdminJson(`/admin/video-submissions/${encodeURIComponent(id)}/url`);
+  const item = response.item || {};
+  const signedUrl = response.signedUrl || '';
+  if (!signedUrl) {
+    throw new Error('Видео сілтемесі дайын болмады.');
+  }
+
+  openAdminModal({
+    title: item.file_name || 'Видео',
+    wide: true,
+    content: `
+      <div class="admin-video-preview">
+        <video class="admin-video-preview__player" controls playsinline src="${escapeHtml(signedUrl)}"></video>
+        <div class="admin-video-preview__meta">
+          <div><strong>Өлшемі:</strong> ${escapeHtml(formatBytes(item.file_size))}</div>
+          <div><strong>Сессия:</strong> ${escapeHtml(item.session_id || '—')}</div>
+          <div><strong>Жүктелген уақыты:</strong> ${escapeHtml(formatDate(item.created_at))}</div>
+          <div><strong>Path:</strong> ${escapeHtml(item.storage_path || '—')}</div>
+          <a class="admin-button admin-button--ghost" href="${escapeHtml(signedUrl)}" target="_blank" rel="noreferrer">Жаңа бетте ашу</a>
+        </div>
+      </div>
+    `
+  });
+}
+
+function ensureAdminModalRoot() {
+  let modal = document.getElementById('adminModalRoot');
+  if (modal) return modal;
+  modal = document.createElement('div');
+  modal.id = 'adminModalRoot';
+  modal.className = 'admin-modal-root';
+  modal.hidden = true;
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function openAdminModal({ title, content, wide = false }) {
+  const root = ensureAdminModalRoot();
+  root.hidden = false;
+  root.innerHTML = `
+    <div class="admin-modal">
+      <div class="admin-modal__backdrop" data-modal-close></div>
+      <section class="admin-modal__dialog${wide ? ' admin-modal__dialog--wide' : ''}" role="dialog" aria-modal="true">
+        <div class="admin-modal__header">
+          <h3>${escapeHtml(title)}</h3>
+          <button class="admin-icon-button" type="button" data-modal-close aria-label="Жабу">×</button>
+        </div>
+        <div class="admin-modal__body">${content}</div>
+      </section>
+    </div>
+  `;
+  document.body.classList.add('admin-modal-open');
+}
+
+function closeAdminModal() {
+  const root = document.getElementById('adminModalRoot');
+  if (!root) return;
+  root.hidden = true;
+  root.innerHTML = '';
+  document.body.classList.remove('admin-modal-open');
+}
+
+
 function render() {
   elements.error.hidden = !state.error;
   elements.error.textContent = state.error;
@@ -513,6 +867,12 @@ function renderProjectsPanel() {
   } else {
     elements.projectsCatalogList.innerHTML = state.projects.map((project) => `
       <article class="admin-project-card${project.id === state.selectedProjectId ? ' is-active' : ''}" data-project-id="${escapeHtml(project.id)}">
+        <div class="admin-project-card__toolbar">
+          ${renderActionMenu('project', project.id, [
+            { action: 'edit', label: 'Өңдеу' },
+            { action: 'delete', label: 'Жою', destructive: true }
+          ])}
+        </div>
         ${project.poster ? `<img src="${escapeHtml(project.poster)}" alt="${escapeHtml(project.title)}">` : ''}
         <div class="admin-project-card__title">${escapeHtml(project.title)}</div>
         <div class="admin-project-card__meta">${escapeHtml(project.genre || 'Жанр көрсетілмеген')}</div>
