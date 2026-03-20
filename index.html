@@ -26,13 +26,82 @@
             </div>
             <p class="admin-sidebar__copy">Фильмдер, рөлдер, өтінімдер, видео және AI мәтіндері бір жерде басқарылады.</p>
             <nav class="admin-sidebar__nav">
-                <a href="#dashboard">Дашборд</a>
-                <a href="#projects">Жобалар</a>
-                <a href="#applications">Өтінімдер</a>
-                <a href="#users">Қолданушылар</a>
-                <a href="#leads">Чат өтінімдері</a>
-                <a href="#videos">Видео</a>
-                <a href="#ai">AI және мәтіндер</a>
+                <a href="#dashboard">
+                    <span class="admin-nav__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                        </svg>
+                    </span>
+                    <span>Дашборд</span>
+                </a>
+                <a href="#users">
+                    <span class="admin-nav__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </span>
+                    <span>Қолданушылар</span>
+                </a>
+                <a href="#projects">
+                    <span class="admin-nav__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 7h16"></path>
+                            <path d="M4 12h16"></path>
+                            <path d="M4 17h10"></path>
+                        </svg>
+                    </span>
+                    <span>Жобалар</span>
+                </a>
+                <a href="#applications">
+                    <span class="admin-nav__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 3h8l5 5v13H3V3z"></path>
+                            <path d="M8 3v5h8"></path>
+                            <path d="M8 13h8"></path>
+                            <path d="M8 17h6"></path>
+                        </svg>
+                    </span>
+                    <span>Өтінімдер</span>
+                </a>
+                <a href="#leads">
+                    <span class="admin-nav__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </span>
+                    <span>Чат өтінімдері</span>
+                </a>
+                <a href="#videos">
+                    <span class="admin-nav__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                            <rect x="1" y="5" width="15" height="14" rx="2"></rect>
+                        </svg>
+                    </span>
+                    <span>Видео</span>
+                </a>
+                <a href="#ai">
+                    <span class="admin-nav__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v4"></path>
+                            <path d="M12 18v4"></path>
+                            <path d="M4.93 4.93l2.83 2.83"></path>
+                            <path d="M16.24 16.24l2.83 2.83"></path>
+                            <path d="M2 12h4"></path>
+                            <path d="M18 12h4"></path>
+                            <path d="M4.93 19.07l2.83-2.83"></path>
+                            <path d="M16.24 7.76l2.83-2.83"></path>
+                            <circle cx="12" cy="12" r="4"></circle>
+                        </svg>
+                    </span>
+                    <span>AI және мәтіндер</span>
+                </a>
             </nav>
             <div class="admin-sidebar__footer"><a href="https://apolloai.biz/">Негізгі сайтқа оралу</a></div>
         </aside>
@@ -40,9 +109,9 @@
         <main class="admin-main">
             <section class="admin-hero" id="dashboard">
                 <div>
-                    <span class="admin-hero__eyebrow">Әкімшілік жүйе</span>
-                    <h1>Meyram Cinema әкімші панелі</h1>
-                    <p>Осы жерден фильмдер, постерлер, рөлдер, таныстырылым видеолары, чат мәтіндері мен өтінімдер басқарылады.</p>
+                    <span class="admin-hero__eyebrow">Meyram Cinema</span>
+                    <h1>Шолу</h1>
+                    <p>Әкімші панелі арқылы қолданушыларды, жобаларды, өтінімдерді және AI жүйесін бір жерден басқарасыз.</p>
                 </div>
                 <div class="admin-toolbar">
                     <button class="admin-button admin-button--ghost" id="adminRefresh" type="button">Жаңарту</button>
@@ -82,6 +151,26 @@
 
                         <section class="admin-content" id="adminContent" hidden>
                 <section class="admin-stats" id="adminStats"></section>
+                <section class="admin-dashboard-grid" id="adminDashboardGrid">
+                    <article class="admin-panel admin-panel--dashboard" id="dashboardActivityPanel">
+                        <div class="admin-panel__header admin-panel__header--dashboard">
+                            <div>
+                                <span class="admin-panel__eyebrow admin-panel__eyebrow--mono">Апталық белсенділік</span>
+                                <h2>Соңғы 7 күн</h2>
+                            </div>
+                        </div>
+                        <div class="admin-chart" id="activityChart"></div>
+                    </article>
+                    <article class="admin-panel admin-panel--dashboard" id="dashboardCategoriesPanel">
+                        <div class="admin-panel__header admin-panel__header--dashboard">
+                            <div>
+                                <span class="admin-panel__eyebrow admin-panel__eyebrow--mono">Бөлімдер бойынша</span>
+                                <h2>Жүктеме құрылымы</h2>
+                            </div>
+                        </div>
+                        <div class="admin-chart" id="categoryChart"></div>
+                    </article>
+                </section>
 
                 <section class="admin-grid admin-grid--top">
                     <article class="admin-panel" id="ai">

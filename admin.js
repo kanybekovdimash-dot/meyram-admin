@@ -55,6 +55,8 @@ const elements = {
   signOut: document.getElementById('adminSignOut'),
   content: document.getElementById('adminContent'),
   stats: document.getElementById('adminStats'),
+  activityChart: document.getElementById('activityChart'),
+  categoryChart: document.getElementById('categoryChart'),
   aiSettingsForm: document.getElementById('aiSettingsForm'),
   projectEditorForm: document.getElementById('projectEditorForm'),
   newProjectButton: document.getElementById('newProjectButton'),
@@ -459,6 +461,7 @@ function render() {
   elements.signOut.hidden = !isAuthed;
 
   renderStats();
+  renderDashboardCharts();
   renderAiSettingsForm();
   renderProjectsPanel();
   renderApplications();
@@ -474,18 +477,208 @@ function renderStats() {
   }
 
   const cards = [
-    ['Жобаға өтінімдер', state.dashboard.stats.projectApplications],
-    ['Қолданушылар', state.usersTotal],
-    ['Чат өтінімдері', state.dashboard.stats.chatLeads],
-    ['Видео-визиткалар', state.dashboard.stats.videoSubmissions]
+    {
+      label: 'Жобаға өтінімдер',
+      value: state.dashboard.stats.projectApplications,
+      icon: 'applications',
+      trend: summarizeTrend(buildDailySeries(state.applications, (item) => item.created_at).values)
+    },
+    {
+      label: 'Қолданушылар',
+      value: state.usersTotal,
+      icon: 'users',
+      trend: summarizeTrend(buildDailySeries(state.users, (item) => item.createdAt).values)
+    },
+    {
+      label: 'Чат өтінімдері',
+      value: state.dashboard.stats.chatLeads,
+      icon: 'chat',
+      trend: summarizeTrend(buildDailySeries(state.leads, (item) => item.created_at).values)
+    },
+    {
+      label: 'Видео-визиткалар',
+      value: state.dashboard.stats.videoSubmissions,
+      icon: 'video',
+      trend: summarizeTrend(buildDailySeries(state.videos, (item) => item.created_at).values)
+    }
   ];
 
-  elements.stats.innerHTML = cards.map(([label, value]) => `
-    <article class="admin-stat">
-      <span class="admin-stat__label">${escapeHtml(label)}</span>
-      <div class="admin-stat__value">${Number(value || 0)}</div>
-    </article>
-  `).join('');
+  elements.stats.innerHTML = cards.map((card) => {
+    const trendClass = card.trend.positive === true ? ' is-positive' : card.trend.positive === false ? ' is-negative' : '';
+    return `
+      <article class="admin-stat">
+        <div class="admin-stat__head">
+          <span class="admin-stat__label">${escapeHtml(card.label)}</span>
+          <span class="admin-stat__icon">${getStatIcon(card.icon)}</span>
+        </div>
+        <div class="admin-stat__value">${Number(card.value || 0).toLocaleString('kk-KZ')}</div>
+        <div class="admin-stat__footer">
+          <span class="admin-stat__trend${trendClass}">${escapeHtml(card.trend.label)}</span>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function renderDashboardCharts() {
+  const activitySeries = buildCombinedActivitySeries();
+  const categories = [
+    { label: 'Өтінімдер', value: state.applications.length || 0 },
+    { label: 'Қолданушылар', value: state.usersTotal || 0 },
+    { label: 'Чаттар', value: state.leads.length || 0 },
+    { label: 'Видео', value: state.videos.length || 0 },
+    { label: 'Жобалар', value: state.projects.filter((item) => item.isPublished !== false).length || 0 }
+  ];
+
+  if (elements.activityChart) {
+    elements.activityChart.innerHTML = renderLineChart(activitySeries);
+  }
+
+  if (elements.categoryChart) {
+    elements.categoryChart.innerHTML = renderBarChart(categories);
+  }
+}
+
+function buildCombinedActivitySeries() {
+  const sources = [
+    buildDailySeries(state.applications, (item) => item.created_at),
+    buildDailySeries(state.users, (item) => item.createdAt),
+    buildDailySeries(state.leads, (item) => item.created_at),
+    buildDailySeries(state.videos, (item) => item.created_at)
+  ];
+
+  const labels = sources[0]?.labels || [];
+  const values = labels.map((_, index) => sources.reduce((sum, source) => sum + Number(source.values[index] || 0), 0));
+  return { labels, values };
+}
+
+function buildDailySeries(items, getDateValue, days = 7) {
+  const counts = new Map();
+  const labels = [];
+  const values = [];
+  const weekdayLabels = ['Жс', 'Дс', 'Сс', 'Ср', 'Бс', 'Жм', 'Сб'];
+
+  (items || []).forEach((item) => {
+    const raw = typeof getDateValue === 'function' ? getDateValue(item) : item?.[getDateValue];
+    if (!raw) return;
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return;
+    const key = date.toISOString().slice(0, 10);
+    counts.set(key, (counts.get(key) || 0) + 1);
+  });
+
+  for (let offset = days - 1; offset >= 0; offset -= 1) {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - offset);
+    const key = date.toISOString().slice(0, 10);
+    labels.push(weekdayLabels[date.getDay()]);
+    values.push(counts.get(key) || 0);
+  }
+
+  return { labels, values };
+}
+
+function summarizeTrend(values) {
+  const safe = Array.isArray(values) ? values : [];
+  const current = safe.slice(-3).reduce((sum, value) => sum + Number(value || 0), 0);
+  const previous = safe.slice(Math.max(0, safe.length - 6), Math.max(0, safe.length - 3)).reduce((sum, value) => sum + Number(value || 0), 0);
+
+  if (!current && !previous) {
+    return { label: 'Қозғалыс жоқ', positive: null };
+  }
+
+  if (!previous) {
+    return { label: '+100% жаңа өсім', positive: true };
+  }
+
+  const delta = ((current - previous) / previous) * 100;
+  const rounded = Math.abs(delta) >= 10 ? Math.round(Math.abs(delta)) : Math.round(Math.abs(delta) * 10) / 10;
+  return {
+    label: `${delta >= 0 ? '+' : '-'}${rounded}% соңғы 3 күн`,
+    positive: delta >= 0
+  };
+}
+
+function getStatIcon(kind) {
+  const icons = {
+    applications: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3h8l5 5v13H3V3z"></path><path d="M8 3v5h8"></path><path d="M8 13h8"></path><path d="M8 17h6"></path></svg>',
+    users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+    chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>',
+    video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2"></rect></svg>'
+  };
+  return icons[kind] || icons.applications;
+}
+
+function renderLineChart(series) {
+  const labels = series.labels || [];
+  const values = series.values || [];
+  const width = 760;
+  const height = 300;
+  const paddingX = 52;
+  const paddingY = 26;
+  const max = Math.max(...values, 1);
+  const innerWidth = width - paddingX * 2;
+  const innerHeight = height - paddingY * 2;
+  const step = values.length > 1 ? innerWidth / (values.length - 1) : innerWidth;
+  const ticks = [1, 0.75, 0.5, 0.25, 0];
+  const points = values.map((value, index) => {
+    const x = paddingX + step * index;
+    const y = paddingY + innerHeight - (value / max) * innerHeight;
+    return `${x},${y}`;
+  }).join(' ');
+  const markers = values.map((value, index) => {
+    const x = paddingX + step * index;
+    const y = paddingY + innerHeight - (value / max) * innerHeight;
+    return `<circle cx="${x}" cy="${y}" r="5.5"></circle>`;
+  }).join('');
+  const grid = ticks.map((ratio) => {
+    const y = paddingY + innerHeight - ratio * innerHeight;
+    const tickValue = Math.round(max * ratio);
+    return `
+      <g>
+        <line x1="${paddingX}" y1="${y}" x2="${width - paddingX}" y2="${y}"></line>
+        <text x="6" y="${y + 4}" class="admin-line-chart__tick">${tickValue.toLocaleString('kk-KZ')}</text>
+      </g>
+    `;
+  }).join('');
+  const total = values.reduce((sum, value) => sum + Number(value || 0), 0);
+
+  return `
+    <div class="admin-line-chart">
+      <div class="admin-line-chart__summary">
+        <strong>${total.toLocaleString('kk-KZ')}</strong>
+        <span>Соңғы 7 күндегі жалпы белсенділік</span>
+      </div>
+      <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true">
+        <g class="admin-line-chart__grid">${grid}</g>
+        <polyline class="admin-line-chart__line" points="${points}"></polyline>
+        <g class="admin-line-chart__markers">${markers}</g>
+      </svg>
+      <div class="admin-line-chart__axis">${labels.map((label) => `<span>${escapeHtml(label)}</span>`).join('')}</div>
+    </div>
+  `;
+}
+
+function renderBarChart(items) {
+  const max = Math.max(...items.map((item) => Number(item.value || 0)), 1);
+  return `
+    <div class="admin-bar-chart">
+      ${items.map((item) => {
+        const value = Number(item.value || 0);
+        const height = Math.max((value / max) * 100, value > 0 ? 12 : 4);
+        return `
+          <div class="admin-bar-chart__item">
+            <div class="admin-bar-chart__value">${value.toLocaleString('kk-KZ')}</div>
+            <div class="admin-bar-chart__track">
+              <span class="admin-bar-chart__bar" style="height:${height}%"></span>
+            </div>
+            <div class="admin-bar-chart__label">${escapeHtml(item.label)}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
 }
 
 function renderAiSettingsForm() {
