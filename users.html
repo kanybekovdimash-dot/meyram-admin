@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meyram Cinema — Дашборд</title>
-    <link rel="canonical" href="https://admin.apolloai.biz/">
+    <title>Meyram Cinema — Қолданушылар</title>
+    <link rel="canonical" href="https://admin.apolloai.biz/users.html">
     <meta name="description" content="Meyram Cinema әкімші панелі.">
     <meta name="apollo-api-base" content="https://apolloai-meyram-api.kanybekovdimash.workers.dev">
     <meta name="apollo-supabase-url" content="https://aaicokmoftpdovszomvi.supabase.co">
@@ -15,7 +15,7 @@
     <link rel="icon" href="https://meyram.agency/themes/meyram/assets/img/logo.svg">
     <link rel="stylesheet" href="./admin.css">
 </head>
-<body class="admin-body" data-page="dashboard">
+<body class="admin-body" data-page="users">
     <div class="admin-shell">
         <aside class="admin-sidebar">
             <div class="admin-brand">
@@ -27,9 +27,9 @@
             </div>
             <p class="admin-sidebar__copy">Фильмдер, рөлдер, өтінімдер, видео және AI мәтіндері бір жерде басқарылады.</p>
             <nav class="admin-sidebar__nav">
-                <a href="./index.html" class="is-active">Дашборд</a>
-                <a href="./admins.html" class="admin-nav__admins">Әкімшілер</a>
-                <a href="./users.html">Қолданушылар</a>
+                <a href="./index.html">Дашборд</a>
+                <a href="./admins.html">Әкімшілер</a>
+                <a href="./users.html" class="is-active admin-nav__users">Қолданушылар</a>
                 <a href="./projects.html">Жобалар</a>
                 <a href="./applications.html">Өтінімдер</a>
                 <a href="./leads.html">Чат өтінімдері</a>
@@ -42,9 +42,9 @@
         <main class="admin-main">
             <section class="admin-hero">
                 <div>
-                    <span class="admin-hero__eyebrow">Әкімшілік жүйе</span>
-                    <h1>Дашборд</h1>
-                    <p>Жүйенің жалпы күйі, соңғы көрсеткіштер және бөлімдерге жылдам өту осы бетте жиналады.</p>
+                    <span class="admin-hero__eyebrow">Қолданушылар тізімі</span>
+                    <h1>Қолданушылар</h1>
+                    <p>Жүйеде тіркелген барлық қолданушылар тізімі.</p>
                 </div>
                 <div class="admin-toolbar">
                     <button class="admin-button admin-button--ghost" id="adminRefresh" type="button">Жаңарту</button>
@@ -52,7 +52,7 @@
                 </div>
             </section>
 
-            <section class="admin-auth" id="adminAuthCard" hidden>
+            <section class="admin-auth" id="adminAuthCard">
                 <div class="admin-auth__brand" aria-hidden="true">
                     <img src="https://meyram.agency/themes/meyram/assets/img/logo.svg" alt="Meyram Cinema">
                     <strong>Meyram Cinema</strong>
@@ -81,7 +81,12 @@
             </section>
 
             <section class="admin-content" id="adminContent" hidden>
-                <section class="admin-stats" id="adminStats"></section>
+                <section class="admin-grid">
+                    <article class="admin-panel admin-panel--admins" id="users">
+                        <div class="admin-panel__header"><div><span class="admin-panel__eyebrow">Қолданушылар</span><h2>Тіркелген қолданушылар</h2></div><span class="admin-count" id="usersCount">0</span></div>
+                        <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Электрон пошта</th><th>Аты</th><th>Телефон</th><th>Рөлі</th><th>Тіркелген уақыты</th><th>Әрекет</th></tr></thead><tbody id="usersTableBody"></tbody></table></div>
+                    </article>
+                </section>
             </section>
         </main>
     </div>
