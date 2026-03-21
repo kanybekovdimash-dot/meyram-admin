@@ -451,11 +451,12 @@ async function onSaveProject(event) {
 
 async function fetchAdminJson(path, options = {}, hasRetried = false) {
   const session = await ensureAdminSession();
+  const hasBody = options.body !== undefined && options.body !== null && options.body !== '';
   const response = await fetch(`${runtime.apiBase}${path}`, {
     ...options,
     headers: {
       Accept: 'application/json',
-      'Content-Type': 'application/json; charset=utf-8',
+      ...(hasBody ? { 'Content-Type': 'application/json; charset=utf-8' } : {}),
       Authorization: `Bearer ${session.accessToken}`,
       ...(options.headers || {})
     }
