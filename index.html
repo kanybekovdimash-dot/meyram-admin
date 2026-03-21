@@ -82,10 +82,22 @@
 
             <section class="admin-content" id="adminContent" hidden>
                 <section class="admin-stats" id="adminStats"></section>
+                <section class="admin-grid">
+                    <article class="admin-panel admin-panel--chart">
+                        <div class="admin-panel__header">
+                            <div>
+                                <span class="admin-panel__eyebrow">Соңғы 7 күн</span>
+                                <h2>Өтінімдер динамикасы</h2>
+                            </div>
+                        </div>
+                        <canvas id="dashboardChart" height="90"></canvas>
+                    </article>
+                </section>
             </section>
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script type="module" src="./admin.js"></script>
 </body>
 </html>

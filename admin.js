@@ -45,6 +45,8 @@ const state = {
   selectedProjectId: null
 };
 
+let dashboardChartInstance = null;
+
 const elements = {
   authCard: document.getElementById('adminAuthCard'),
   authForm: document.getElementById('adminAuthForm'),
@@ -69,7 +71,8 @@ const elements = {
   leadsCount: document.getElementById('leadsCount'),
   leadsTableBody: document.getElementById('leadsTableBody'),
   videosCount: document.getElementById('videosCount'),
-  videosList: document.getElementById('videosList')
+  videosList: document.getElementById('videosList'),
+  dashboardChart: document.getElementById('dashboardChart')
 };
 
 init();
@@ -910,6 +913,7 @@ function render() {
   renderUsers();
   renderLeads();
   renderVideos();
+  renderChart();
 }
 
 function renderStats() {
@@ -932,6 +936,59 @@ function renderStats() {
       <div class="admin-stat__value">${Number(value || 0)}</div>
     </article>
   `).join('');
+}
+
+function renderChart() {
+  if (!elements.dashboardChart || !state.dashboard?.recent) return;
+
+  const labels = state.dashboard.recent.map(item => item.date);
+  const applications = state.dashboard.recent.map(item => item.applications || 0);
+  const leads = state.dashboard.recent.map(item => item.leads || 0);
+
+  if (dashboardChartInstance) {
+    dashboardChartInstance.data.labels = labels;
+    dashboardChartInstance.data.datasets[0].data = applications;
+    dashboardChartInstance.data.datasets[1].data = leads;
+    dashboardChartInstance.update();
+    return;
+  }
+
+  const ctx = elements.dashboardChart.getContext('2d');
+  dashboardChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Жоба өтінімдері',
+          data: applications,
+          backgroundColor: '#2f9e62',
+          borderRadius: 8
+        },
+        {
+          label: 'Чат өтінімдері',
+          data: leads,
+          backgroundColor: '#b99457',
+          borderRadius: 8
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom',
+          labels: { font: { family: 'Montserrat', weight: '600' } }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true, grid: { display: false } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
 }
 
 function renderAiSettingsForm() {
