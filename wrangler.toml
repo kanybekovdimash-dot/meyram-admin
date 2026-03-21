@@ -1,8 +1,0 @@
-# Cloudflare Pages — статический сайт (HTML / CSS / JS)
-# Деплой: npx wrangler pages deploy . --project-name=meyram-admin
-# или: .\deploy.ps1
-
-name = "meyram-admin"
-account_id = "412db0cf9cffd7b9e634b190bcbf5fed"
-compatibility_date = "2024-12-01"
-pages_build_output_dir = "."
