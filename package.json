@@ -1,0 +1,10 @@
+{
+  "name": "meyram-admin",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler pages deploy . --project-name=meyram-admin"
+  },
+  "devDependencies": {
+    "wrangler": "^3.114.0"
+  }
+}

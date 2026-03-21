@@ -1,0 +1,4 @@
+node_modules/
+.wrangler/
+.cloudflare.env
+.DS_Store

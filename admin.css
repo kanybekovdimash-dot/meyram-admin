@@ -377,6 +377,13 @@ button { cursor: pointer; }
 }
 
 .admin-content { display: grid; gap: 24px; }
+.admin-content-error {
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: rgba(191, 47, 47, 0.1);
+    color: #b24040;
+    font-weight: 600;
+}
 .admin-grid { display: grid; gap: 18px; }
 .admin-grid--top { display: grid; gap: 18px; }
 .admin-panel__header {

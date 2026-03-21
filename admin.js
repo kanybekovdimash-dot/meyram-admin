@@ -521,11 +521,16 @@ async function onDocumentClick(event) {
     event.preventDefault();
     event.stopPropagation();
     closeActionMenus();
-    await handleMenuAction(
-      menuItem.getAttribute('data-entity') || '',
-      menuItem.getAttribute('data-action') || '',
-      menuItem.getAttribute('data-id') || ''
-    );
+    try {
+      await handleMenuAction(
+        menuItem.getAttribute('data-entity') || '',
+        menuItem.getAttribute('data-action') || '',
+        menuItem.getAttribute('data-id') || ''
+      );
+    } catch (err) {
+      state.error = err?.message || 'Әрекет орындалмады.';
+      render();
+    }
     return;
   }
 
@@ -585,7 +590,24 @@ function getRecordByEntity(entity, id) {
 }
 
 async function handleMenuAction(entity, action, id) {
-  const record = getRecordByEntity(entity, id);
+  const idStr = String(id || '').trim();
+  // Видео: id из кнопки меню — не требуем совпадения в state (иначе Жою молча не срабатывал)
+  if (entity === 'video' && idStr) {
+    if (action === 'view') {
+      await openVideoPreview(idStr);
+      return;
+    }
+    if (action === 'delete') {
+      const ok = window.confirm('Бұл видеоны өшіргіңіз келе ме?');
+      if (!ok) return;
+      state.error = '';
+      await fetchAdminJson(`/admin/video-submissions/${encodeURIComponent(idStr)}`, { method: 'DELETE' });
+      await loadAdminData();
+      return;
+    }
+  }
+
+  const record = getRecordByEntity(entity, idStr);
   if (!record) return;
 
   if (entity === 'project') {
@@ -603,20 +625,6 @@ async function handleMenuAction(entity, action, id) {
         state.selectedProjectId = state.projects[0]?.id || null;
       }
       renderProjectsPanel();
-      return;
-    }
-  }
-
-  if (entity === 'video') {
-    if (action === 'view') {
-      await openVideoPreview(id);
-      return;
-    }
-    if (action === 'delete') {
-      const ok = window.confirm('Бұл видеоны өшіргіңіз келе ме?');
-      if (!ok) return;
-      await fetchAdminJson(`/admin/video-submissions/${encodeURIComponent(id)}`, { method: 'DELETE' });
-      await loadAdminData();
       return;
     }
   }
@@ -804,10 +812,25 @@ function closeAdminModal() {
 
 
 function render() {
-  elements.error.hidden = !state.error;
-  elements.error.textContent = state.error;
+  if (elements.error) {
+    elements.error.textContent = state.error;
+    elements.error.hidden = !state.error;
+  }
 
   const isAuthed = Boolean(state.session?.accessToken);
+  let contentErr = document.getElementById('adminContentError');
+  if (elements.content && !contentErr) {
+    contentErr = document.createElement('div');
+    contentErr.id = 'adminContentError';
+    contentErr.className = 'admin-content-error';
+    contentErr.setAttribute('role', 'alert');
+    elements.content.insertBefore(contentErr, elements.content.firstChild);
+  }
+  if (contentErr) {
+    contentErr.textContent = state.error || '';
+    contentErr.hidden = !state.error || !isAuthed;
+  }
+
   document.body.classList.toggle('admin-authenticated', isAuthed);
   document.body.classList.toggle('admin-guest', !isAuthed);
 
