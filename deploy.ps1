@@ -44,6 +44,12 @@ if ($cfEnv.ContainsKey('CLOUDFLARE_API_TOKEN') -and -not [string]::IsNullOrWhite
 if ($cfEnv.ContainsKey('CLOUDFLARE_ACCOUNT_ID') -and -not [string]::IsNullOrWhiteSpace($cfEnv['CLOUDFLARE_ACCOUNT_ID'])) {
   $env:CLOUDFLARE_ACCOUNT_ID = [string]$cfEnv['CLOUDFLARE_ACCOUNT_ID']
 }
+if ($cfEnv.ContainsKey('CLOUDFLARE_API_KEY') -and -not [string]::IsNullOrWhiteSpace($cfEnv['CLOUDFLARE_API_KEY'])) {
+  $env:CLOUDFLARE_API_KEY = [string]$cfEnv['CLOUDFLARE_API_KEY']
+}
+if ($cfEnv.ContainsKey('CLOUDFLARE_EMAIL') -and -not [string]::IsNullOrWhiteSpace($cfEnv['CLOUDFLARE_EMAIL'])) {
+  $env:CLOUDFLARE_EMAIL = [string]$cfEnv['CLOUDFLARE_EMAIL']
+}
 
 if (-not $env:CLOUDFLARE_API_TOKEN) {
   Write-Host "CLOUDFLARE_API_TOKEN not set. Create meyram-admin/.cloudflare.env or use local-worker/.cloudflare.env" -ForegroundColor Yellow

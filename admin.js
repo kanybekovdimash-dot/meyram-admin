@@ -921,7 +921,7 @@ function renderStats() {
 
   const cards = [
     ['Жобаға өтінімдер', state.dashboard.stats.projectApplications],
-    ['Қолданушылар', state.usersTotal],
+    ['Әкімшілер', state.usersTotal],
     ['Чат өтінімдері', state.dashboard.stats.chatLeads],
     ['Видео-визиткалар', state.dashboard.stats.videoSubmissions]
   ];
