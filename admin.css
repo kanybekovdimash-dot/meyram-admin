@@ -404,6 +404,9 @@ button { cursor: pointer; }
     color: var(--admin-gold-deep);
     font-weight: 700;
 }
+.admin-panel--admins .admin-panel__eyebrow { color: var(--admin-green-deep); }
+.admin-panel--admins .admin-count { background: rgba(47, 158, 98, 0.15); color: var(--admin-green-deep); }
+.admin-panel--admins { border-color: rgba(47, 158, 98, 0.2); }
 .admin-table-wrap { overflow-x: auto; }
 .admin-table { width: 100%; border-collapse: collapse; }
 .admin-table th, .admin-table td {
@@ -645,6 +648,11 @@ button { cursor: pointer; }
 .admin-shortcut:focus-visible {
     border-color: rgba(47, 158, 98, 0.24);
     background: rgba(47, 158, 98, 0.08);
+}
+.admin-shortcut--highlight {
+    border-color: rgba(47, 158, 98, 0.35);
+    background: linear-gradient(135deg, rgba(47, 158, 98, 0.12), rgba(31, 127, 76, 0.1));
+    font-weight: 600;
 }
 
 .admin-modal-open {

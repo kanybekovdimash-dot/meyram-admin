@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meyram Cinema — Қолданушылар</title>
+    <title>Meyram Cinema — Әкімшілер</title>
+    <link rel="canonical" href="https://admin.apolloai.biz/admins.html">
     <meta name="description" content="Meyram Cinema әкімші панелі.">
     <meta name="apollo-api-base" content="https://apolloai-meyram-api.kanybekovdimash.workers.dev">
     <meta name="apollo-supabase-url" content="https://aaicokmoftpdovszomvi.supabase.co">
@@ -14,7 +15,7 @@
     <link rel="icon" href="https://meyram.agency/themes/meyram/assets/img/logo.svg">
     <link rel="stylesheet" href="./admin.css">
 </head>
-<body class="admin-body" data-page="users">
+<body class="admin-body" data-page="admins">
     <div class="admin-shell">
         <aside class="admin-sidebar">
             <div class="admin-brand">
@@ -27,9 +28,8 @@
             <p class="admin-sidebar__copy">Фильмдер, рөлдер, өтінімдер, видео және AI мәтіндері бір жерде басқарылады.</p>
             <nav class="admin-sidebar__nav">
                 <a href="./index.html">Дашборд</a>
-                <a href="./users.html" class="is-active">Әкімшілер</a>
+                <a href="./admins.html" class="is-active admin-nav__admins">Әкімшілер</a>
                 <a href="./projects.html">Жобалар</a>
-                <a href="./users.html" class="is-active">Қолданушылар</a>
                 <a href="./applications.html">Өтінімдер</a>
                 <a href="./leads.html">Чат өтінімдері</a>
                 <a href="./videos.html">Видео</a>
@@ -41,11 +41,12 @@
         <main class="admin-main">
             <section class="admin-hero">
                 <div>
-                    <span class="admin-hero__eyebrow">Тіркелген қолданушылар</span>
-                    <h1>Қолданушылар</h1>
-                    <p>Жүйеге тіркелген адамдардың тізімі мен негізгі аккаунт деректері осы бетте көрінеді.</p>
+                    <span class="admin-hero__eyebrow">Әкімшілік құжаттары</span>
+                    <h1>Әкімшілер</h1>
+                    <p>Жүйеге кіру құқығы бар әкімшілер тізімі.</p>
                 </div>
                 <div class="admin-toolbar">
+                    <button class="admin-button" id="adminAddAdmin" type="button">Әкімшіні қосу</button>
                     <button class="admin-button admin-button--ghost" id="adminRefresh" type="button">Жаңарту</button>
                     <button class="admin-button admin-button--ghost" id="adminSignOut" type="button">Шығу</button>
                 </div>
@@ -81,8 +82,8 @@
 
             <section class="admin-content" id="adminContent" hidden>
                 <section class="admin-grid">
-                    <article class="admin-panel" id="users">
-                        <div class="admin-panel__header"><div><span class="admin-panel__eyebrow">Қолданушылар</span><h2>Тіркелген адамдар</h2></div><span class="admin-count" id="usersCount">0</span></div>
+                    <article class="admin-panel admin-panel--admins" id="users">
+                        <div class="admin-panel__header"><div><span class="admin-panel__eyebrow">Әкімшілер</span><h2>Тіркелген әкімшілер</h2></div><span class="admin-count" id="usersCount">0</span></div>
                         <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Электрон пошта</th><th>Аты</th><th>Телефон</th><th>Рөлі</th><th>Тіркелген уақыты</th><th>Әрекет</th></tr></thead><tbody id="usersTableBody"></tbody></table></div>
                     </article>
                 </section>

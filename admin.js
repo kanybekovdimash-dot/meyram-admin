@@ -53,6 +53,7 @@ const elements = {
   error: document.getElementById('adminError'),
   refresh: document.getElementById('adminRefresh'),
   signOut: document.getElementById('adminSignOut'),
+  addAdmin: document.getElementById('adminAddAdmin'),
   content: document.getElementById('adminContent'),
   stats: document.getElementById('adminStats'),
   aiSettingsForm: document.getElementById('aiSettingsForm'),
@@ -77,6 +78,7 @@ function init() {
   elements.authForm?.addEventListener('submit', onSubmitAuth);
   elements.refresh?.addEventListener('click', () => loadAdminData());
   elements.signOut?.addEventListener('click', signOut);
+  elements.addAdmin?.addEventListener('click', openAddAdminModal);
   elements.aiSettingsForm?.addEventListener('submit', onSaveAiSettings);
   elements.projectEditorForm?.addEventListener('submit', onSaveProject);
   elements.newProjectButton?.addEventListener('click', () => selectProject(null));
@@ -247,10 +249,14 @@ async function loadAdminData() {
   try {
     await ensureAdminSession();
 
+    const pageType = document.body.getAttribute('data-page') || '';
+    const userFilter = pageType === 'admins' ? 'admins' : (pageType === 'users' ? 'site' : '');
+    const usersUrl = '/admin/users?limit=100' + (userFilter ? '&filter=' + userFilter : '');
+
     const [dashboard, applications, users, leads, videos, projects, aiSettings] = await Promise.all([
       fetchAdminJson('/admin/dashboard'),
       fetchAdminJson('/admin/project-applications?limit=24'),
-      fetchAdminJson('/admin/users?limit=24'),
+      fetchAdminJson(usersUrl),
       fetchAdminJson('/admin/chat-leads?limit=24'),
       fetchAdminJson('/admin/video-submissions?limit=24'),
       fetchAdminJson('/admin/projects?limit=100'),
@@ -654,6 +660,62 @@ async function handleMenuAction(entity, action, id) {
   }
 }
 
+function openAddAdminModal() {
+  openAdminModal({
+    title: 'Әкімшіні қосу',
+    content: `
+      <form class="admin-form admin-modal__form" id="adminAddAdminForm">
+        <div class="admin-form__grid admin-form__grid--2">
+          <label class="admin-field">
+            <span>Электрондық пошта</span>
+            <input name="email" type="email" required placeholder="admin@meyram.kz" autocomplete="username">
+          </label>
+          <label class="admin-field">
+            <span>Құпиясөз</span>
+            <input name="password" type="password" required minlength="6" placeholder="Кемінде 6 таңба" autocomplete="new-password">
+          </label>
+        </div>
+        <p class="admin-auth__error" id="adminAddAdminError" style="min-height:1.2em"></p>
+        <div class="admin-form__actions admin-modal__actions">
+          <button class="admin-button admin-button--ghost" type="button" data-modal-close>Жабу</button>
+          <button class="admin-button" type="submit">Қосу</button>
+        </div>
+      </form>
+    `
+  });
+
+  const form = document.getElementById('adminAddAdminForm');
+  const errEl = document.getElementById('adminAddAdminError');
+  if (!form) return;
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = String(form.email?.value || '').trim();
+    const password = String(form.password?.value || '');
+
+    if (errEl) errEl.textContent = '';
+    if (!email || !password) {
+      if (errEl) errEl.textContent = 'Электрон пошта мен құпиясөзді енгізіңіз.';
+      return;
+    }
+    if (password.length < 6) {
+      if (errEl) errEl.textContent = 'Құпиясөз кемінде 6 таңбадан тұруы керек.';
+      return;
+    }
+
+    try {
+      await fetchAdminJson('/admin/admins', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+      closeAdminModal();
+      await loadAdminData();
+    } catch (err) {
+      if (errEl) errEl.textContent = err?.message || 'Қосу мүмкін болмады.';
+    }
+  });
+}
+
 function openEditModal(entity, record) {
   const config = getEditConfig(entity, record);
   if (!config) return;
@@ -839,6 +901,7 @@ function render() {
   elements.content.hidden = !isAuthed;
   elements.refresh.hidden = !isAuthed;
   elements.signOut.hidden = !isAuthed;
+  if (elements.addAdmin) elements.addAdmin.hidden = !isAuthed;
 
   renderStats();
   renderAiSettingsForm();
