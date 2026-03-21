@@ -78,7 +78,8 @@ button { cursor: pointer; }
     padding: 12px 14px;
     border-radius: 14px;
     border: 1px solid transparent;
-    color: var(--admin-text-soft);
+    color: var(--admin-text);
+    font-weight: 500;
 }
 .admin-sidebar__nav a:hover,
 .admin-sidebar__nav a:focus-visible {
